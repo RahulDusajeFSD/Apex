@@ -1,0 +1,57 @@
+Problem Statement: When an opportunity is marked Closed Won, create follow up tasks for sales team to engage, schedule a welcome call, send a thank you email. Update next steps of opportunity to Onboard a contract.
+
+
+Code: 
+
+trigger myOpportunityTest on Opportunity (before insert, after update, before update) {
+    
+    switch on Trigger.operationType{
+        
+        when AFTER_UPDATE{
+            
+            
+            List<Task> tasks = new List<>();
+            
+            
+            for(Opportunity opportunity:Trigger.new){
+                if(opportunity.StageName == 'Closed Won'){
+                Task engagementTask = new task();
+                
+                engagementTask.WhatId = opportunity.Id;
+                engagementTask.Subject = 'Follow up for sales team';
+                engagementTask.Priority = 'High';
+                
+                
+                Task scheduleWelcomeCallTask = new Task();
+                scheduleWelcomeCallTask.WhatId = opportunity.Id;
+                scheduleWelcomeCallTask.Subject = 'Schedule a Welcome Call';
+                scheduleWelcomeCallTask.Priority = 'High';
+                
+                Task sendThankYouEmail = new Task();
+                sendThankYouEmail.WhatId = opportunity.Id;
+                sendThankYouEmail.Subject = 'Send Thank You Email';
+                sendThankYouEmail.Priority = 'High';
+                
+                tasks.add(engagementTask);
+                tasks.add(scheduleWelcomeCallTask);
+                tasks.add(sendThankYouEmail);
+            }
+                
+            }
+            
+            insert tasks;
+            
+        }
+        
+        when BEFORE_INSERT, BEFORE_UPDATE{
+                       
+            for(Opportunity opportunity:Trigger.new){
+                 if(opportunity.StageName == 'Closed Won')
+            opportunity.NextStep = 'Onboard a contract';
+            }
+            
+        }
+      
+    }
+
+}
